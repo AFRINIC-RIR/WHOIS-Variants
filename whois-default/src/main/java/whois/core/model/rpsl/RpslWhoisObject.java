@@ -12,7 +12,9 @@ import java.util.Map;
  */
 public class RpslWhoisObject implements WhoisObject, Serializable {
 
-    private transient static final String RPSL_LINE_FORMAT = "%-16s%s";
+    //private transient static final String RPSL_LINE_FORMAT = "%-16s%s";
+
+    private RpslFormatUtil rpslFormatUtil = new RpslFormatUtil();
 
     private final Map<String, String> keyValueMap = new LinkedHashMap<String, String>();
 
@@ -38,6 +40,7 @@ public class RpslWhoisObject implements WhoisObject, Serializable {
 
     @Override
     public String toString() {
+        /*
         StringBuilder sb = new StringBuilder();
         StringBuilder sb2 = new StringBuilder();
         Iterator<Map.Entry<String, String>> iterator = getKeyValueIterator();
@@ -48,5 +51,7 @@ public class RpslWhoisObject implements WhoisObject, Serializable {
             sb.append(String.format(RPSL_LINE_FORMAT, sb2.toString(), entry.getValue())).append("\n");
         }
         return sb.toString();
+        */
+        return rpslFormatUtil.format(keyValueMap);
     }
 }

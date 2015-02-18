@@ -15,10 +15,9 @@ import java.net.InetSocketAddress;
 /**
  * Created by yogesh on 1/6/15.
  */
-abstract class AbstractSocketEventListener extends IoHandlerAdapter {
+public abstract class AbstractSocketEventListener extends IoHandlerAdapter {
 
-
-    private static final String EOF = "\u0004";
+    public static final String EOF = "\u0004";
 
     @Inject
     private CommandFactory commandFactory;

@@ -24,7 +24,7 @@ public class DeleteCommandTest extends AbstractDatabaseTestCase {
     public void testDelete() {
         subject.setParameter("a:b");
         subject.run();
-        assertEquals("Successfully deleted:\na:              b\n\n", subject.getResult());
+        assertEquals("Successfully deleted:\na:              b\n", subject.getResult());
     }
 
     @Test
@@ -33,7 +33,7 @@ public class DeleteCommandTest extends AbstractDatabaseTestCase {
         subject.run();
         subject.setParameter("a:b");
         subject.run();
-        assertEquals("Successfully deleted:\na:              b\n\n" +
+        assertEquals("Successfully deleted:\na:              b\n" +
                 "Object with key \"a:b\" not found\n", subject.getResult());
     }
 }

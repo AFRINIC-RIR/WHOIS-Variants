@@ -1,6 +1,7 @@
 package whois.core.api;
 
 import org.springframework.context.annotation.Scope;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -24,6 +25,7 @@ public class DeleteCommand implements Command<String, String> {
         commandLine = parameter;
     }
 
+    @Transactional
     public void run() {
         //noinspection unchecked
         store.delete(commandLine, observer);

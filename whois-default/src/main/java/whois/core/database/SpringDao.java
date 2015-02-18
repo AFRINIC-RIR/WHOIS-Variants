@@ -36,6 +36,7 @@ public class SpringDao implements Store<String, WhoisObject> {
      * @return WHOIS Object found
      */
     public WhoisObject load(String key, Observer observer) {
+        assert key != null;
         key = key.trim().replaceFirst(":\\s+", ":");
         Session session = sessionFactory.openSession();
         StoreModel storeModel = (StoreModel) session.get(modelAdapter.getModelClass(null), key);

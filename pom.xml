@@ -13,6 +13,7 @@
         <module>command-api</module>
         <module>whois-api</module>
         <module>whois-default</module>
+        <module>whois-camel</module>
         <module>ip-tools</module>
     </modules>
 

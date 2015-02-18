@@ -14,7 +14,7 @@ public class BufferedObserver implements Observer {
     private final StringBuilder notificationAccumulator = new StringBuilder();
 
     public void notify(String message) {
-        notificationAccumulator.append(message).append("\n");
+        notificationAccumulator.append("%% ").append(message).append("\n");
     }
 
     public String report() {

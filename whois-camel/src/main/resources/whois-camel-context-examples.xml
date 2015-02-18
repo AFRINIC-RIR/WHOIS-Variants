@@ -1,0 +1,101 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+                           http://camel.apache.org/schema/spring
+                           http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+    <import resource="classpath*:/whois-core-context.xml"/>
+
+    <camelContext xmlns="http://camel.apache.org/schema/spring">
+
+        <!-- Cron -->
+        <route id="quartz-update">
+            <from uri="quartz2://myGroup/myTimerName?cron=0 0 1 * * ? *"/>
+            <transform>
+                <simple>a:b\nc:${header.triggerName}</simple>
+            </transform>
+            <bean ref="UpdateService" method="messageReceived"/>
+        </route>
+
+        <!-- Solr -->
+        <route id="solr-update">
+            <from uri="mina2:tcp://localhost:4463?codec=#MultilineTextCodecFactory&amp;disconnect=true&amp;sync=false"/>
+            <bean ref="Rpsl2SolrService" method="messageReceived"/>
+            <setHeader headerName="SolrOperation">
+                <constant>INSERT</constant>
+            </setHeader>
+            <to uri="solrCloud://bamboo01.dev.mu.afrinic.net:8983/solr?collection=collection1&amp;allowCompression=true"/>
+            <setHeader headerName="SolrOperation">
+                <constant>COMMIT</constant>
+            </setHeader>
+            <to uri="solrCloud://bamboo01.dev.mu.afrinic.net:8983/solr?collection=collection1&amp;allowCompression=true"/>
+        </route>
+
+        <!-- Printer -->
+        <route id="printer-update">
+            <from uri="mina2:tcp://localhost:4466?codec=#MultilineTextCodecFactory&amp;disconnect=true&amp;sync=false"/>
+            <bean ref="TextConvertService" method="messageReceived"/>
+            <to uri="lpr://localhost/_196_1_0_4?mediaSize=ISO_A4&amp;flavor=DocFlavor.STRING"/>
+        </route>
+
+        <!-- CouchDB -->
+        <route id="couchdb-update">
+            <from uri="mina2:tcp://localhost:4464?codec=#MultilineTextCodecFactory&amp;disconnect=true"/>
+            <bean ref="Rpsl2CouchdbService" method="messageReceived"/>
+            <to uri="couchdb:http://localhost:5984/whois?createDatabase=true"/>
+        </route>
+
+        <!-- Email -->
+        <route id="email-update">
+            <from uri="mina2:tcp://localhost:4465?codec=#MultilineTextCodecFactory&amp;disconnect=true"/>
+            <bean ref="TextConvertService" method="messageReceived"/>
+            <to uri="smtp://smtp.afrinic.net?To=yogesh@afrinic.net&amp;Subject=Your+conversion"/>
+        </route>
+
+    </camelContext>
+
+    <!--
+       - Output
+         - http://camel.apache.org/couchdb.html - DONE
+         - http://camel.apache.org/solr.html - DONE
+         - http://camel.apache.org/mail.html - DONE
+         - http://camel.apache.org/printer.html - DONE
+         - http://camel.apache.org/log.html - DONE
+         - http://camel.apache.org/nagios.html
+
+       - Input
+         - http://camel.apache.org/restlet.html - DONE
+         - http://camel.apache.org/quartz2.html - DONE
+         - http://camel.apache.org/servlet.html
+         - http://camel.apache.org/ftp2.html
+         - http://camel.apache.org/rss.html
+         - http://camel.apache.org/ldap.html
+
+       - I/O
+         - http://camel.apache.org/websocket.html - DONE
+         - http://camel.apache.org/mongodb.html
+         - http://camel.apache.org/jira.html
+
+       - Formatting
+         - http://camel.apache.org/velocity.html - DONE
+         - http://camel.apache.org/mvel-component.html
+    -->
+
+    <!--
+       TODO
+         - Inputs:
+           - HTTP - DONE
+           - Quartz - DONE
+           - Email - TODO
+         - Load balancing
+         - Parallel updates
+         - Output
+           - Multiple formats from 1 query object
+
+       Notes
+         - CouchDB:
+           - Updates/Versioning ; MUST send latest "_rev" in JSON ; http://writing.jan.io/2013/12/19/understanding-couchdb-conflicts.html
+    -->
+
+</beans>
