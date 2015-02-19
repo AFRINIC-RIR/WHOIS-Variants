@@ -92,7 +92,7 @@ public abstract class AbstractDatabaseTestCase implements InitializingBean {
     }
 
     protected String toResult(RpslWhoisObject... rwos) {
-        StringBuilder sb = new StringBuilder("Found:\n");
+        StringBuilder sb = new StringBuilder("%% Found:\n");
         for (RpslWhoisObject rwo : rwos) {
             sb.append(rwo.toString()).append("\n");
         }
