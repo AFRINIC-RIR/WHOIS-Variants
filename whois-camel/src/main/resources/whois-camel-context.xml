@@ -107,7 +107,7 @@
         <!-- MAIL -->
         <!--
         <route id="email-poll">
-            <from uri="imaps://imap.afrinic.net:993?debugMode=true&amp;fetchSize=2&amp;username=yogesh&amp;password=p!ss@nGel&amp;searchTerm.subject=Camel&amp;searchTerm.fromSentDate=now-2m"/>
+            <from uri="imaps://imap.afrinic.net:993?debugMode=true&amp;fetchSize=2&amp;username=USERNAME&amp;password=PASSWORD&amp;searchTerm.subject=Camel&amp;searchTerm.fromSentDate=now-2m"/>
             <setHeader headerName="command">
                 <constant>update</constant>
             </setHeader>
