@@ -87,11 +87,15 @@
          - Inputs:
            - HTTP - DONE
            - Quartz - DONE
-           - Email - TODO
-         - Load balancing
+           - Email - HARD
+         - Load balancing - DONE
+         - Exception handling - DONE
+         - Return selected HTTP Error code - DONE
          - Parallel updates
          - Output
-           - Multiple formats from 1 query object
+           - Multiple formats from 1 query endpoint - DONE
+         - BPM
+           - activiti-camel - HARD
 
        Notes
          - CouchDB:

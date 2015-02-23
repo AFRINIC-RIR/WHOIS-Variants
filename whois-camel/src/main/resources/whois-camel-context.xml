@@ -8,35 +8,29 @@
     <import resource="classpath*:/whois-core-context.xml"/>
 
     <camelContext xmlns="http://camel.apache.org/schema/spring">
-        <!-- TCP Socket -->
-        <route id="query">
-            <from uri="mina2:tcp://localhost:4443?textline=true&amp;disconnect=true"/>
-            <setHeader headerName="command">
-                <constant>query</constant>
-            </setHeader>
-            <bean ref="WhoisService" method="messageReceived"/>
-            <to uri="velocity:whois-query.vm"/>
-        </route>
-        <route id="update">
-            <from uri="mina2:tcp://localhost:4444?codec=#MultilineTextCodecFactory&amp;disconnect=true"/>
-            <setHeader headerName="command">
-                <constant>update</constant>
-            </setHeader>
-            <bean ref="WhoisService" method="messageReceived"/>
-            <to uri="velocity:whois-query.vm"/>
-        </route>
-        <route id="delete">
-            <from uri="mina2:tcp://localhost:4445?textline=true&amp;disconnect=true"/>
-            <setHeader headerName="command">
-                <constant>delete</constant>
-            </setHeader>
-            <bean ref="WhoisService" method="messageReceived"/>
-            <to uri="velocity:whois-query.vm"/>
+
+        <!-- Exception handler -->
+        <onException>
+            <exception>whois.core.api.CommandException</exception>
+            <handled>
+                <constant>true</constant>
+            </handled>
+            <bean ref="ExceptionService" method="commandFailed"/>
+        </onException>
+
+        <!-- Load balancer -->
+        <route id="restlet-query-convert">
+            <from uri="restlet:http://localhost:4480/{id}/{format}?restletMethod=get"/>
+            <loadBalance>
+                <roundRobin/>
+                <to uri="direct:restlet-query-convert-4481"/>
+                <to uri="direct:restlet-query-convert-4482"/>
+                <to uri="direct:restlet-query-convert-4483"/>
+            </loadBalance>
         </route>
 
-        <!-- REST -->
-        <route id="restlet-query-convert">
-            <from uri="restlet:http://localhost:4480/{id}/{format}?restletMethod=GET"/>
+        <route id="restlet-query-convert-4481">
+            <from uri="direct:restlet-query-convert-4481"/>
             <transform>
                 <simple>${header.id}</simple>
             </transform>
@@ -51,69 +45,40 @@
             <to uri="log:whois.core.api.QueryCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false"/>
             <to uri="velocity:whois-query.vm"/>
         </route>
-        <route id="restlet-query">
-            <from uri="restlet:http://localhost:4480/{id}?restletMethod=GET"/>
-            <transform>
-                <simple>${header.id}</simple>
-            </transform>
-            <setHeader headerName="command">
-                <constant>query</constant>
-            </setHeader>
-            <bean ref="WhoisService" method="messageReceived"/>
-            <to uri="log:whois.core.api.QueryCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false"/>
-            <to uri="velocity:whois-query.vm"/>
-        </route>
-        <route id="restlet-update">
-            <from uri="restlet:http://localhost:4480/?restletMethods=POST,PUT"/>
-            <setHeader headerName="command">
-                <constant>update</constant>
-            </setHeader>
-            <bean ref="WhoisService" method="messageReceived"/>
-            <to uri="log:whois.core.api.UpdateCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false"/>
-            <to uri="velocity:whois-query.vm"/>
-        </route>
-        <route id="restlet-delete">
-            <from uri="restlet:http://localhost:4480/{id}?restletMethod=DELETE"/>
-            <transform>
-                <simple>${header.id}</simple>
-            </transform>
-            <to uri="log:whois.core.api.DeleteCommand?level=INFO"/>
-            <setHeader headerName="command">
-                <constant>delete</constant>
-            </setHeader>
-            <bean ref="WhoisService" method="messageReceived"/>
-            <to uri="log:whois.core.api.DeleteCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false"/>
-            <to uri="velocity:whois-query.vm"/>
-        </route>
 
-        <!-- WebSocket -->
-        <route id="quartz-update">
-            <from uri="quartz2://myGroup/myTimerName?cron=0 0/1 * * * ? *"/>
+        <route id="restlet-query-convert-4482">
+            <from uri="direct:restlet-query-convert-4482"/>
             <transform>
-                <constant>a:b</constant>
+                <simple>${header.id}</simple>
             </transform>
             <setHeader headerName="command">
                 <constant>query</constant>
             </setHeader>
             <bean ref="WhoisService" method="messageReceived"/>
-            <to uri="log:whois.core.api.QueryCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false"/>
             <setHeader headerName="conversion">
-                <constant>rpsl2html</constant>
+                <simple>rpsl2${header.format}</simple>
             </setHeader>
             <bean ref="TextConvertService" method="messageReceived"/>
-            <to uri="websocket://localhost:9292/whois?sendToAll=true"/>
+            <to uri="log:whois.core.api.QueryCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false"/>
+            <to uri="velocity:whois-query.vm"/>
         </route>
 
-        <!-- MAIL -->
-        <!--
-        <route id="email-poll">
-            <from uri="imaps://imap.afrinic.net:993?debugMode=true&amp;fetchSize=2&amp;username=USERNAME&amp;password=PASSWORD&amp;searchTerm.subject=Camel&amp;searchTerm.fromSentDate=now-2m"/>
+        <route id="restlet-query-convert-4483">
+            <from uri="direct:restlet-query-convert-4483"/>
+            <transform>
+                <simple>${header.id}</simple>
+            </transform>
             <setHeader headerName="command">
-                <constant>update</constant>
+                <constant>query</constant>
             </setHeader>
             <bean ref="WhoisService" method="messageReceived"/>
+            <setHeader headerName="conversion">
+                <simple>rpsl2${header.format}</simple>
+            </setHeader>
+            <bean ref="TextConvertService" method="messageReceived"/>
+            <to uri="log:whois.core.api.QueryCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false"/>
+            <to uri="velocity:whois-query.vm"/>
         </route>
-        -->
 
     </camelContext>
 

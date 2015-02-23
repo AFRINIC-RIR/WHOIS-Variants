@@ -45,7 +45,7 @@ public class SpringDao implements Store<String, WhoisObject> {
             retVal = modelAdapter.convertToWhoisObject(storeModel);
             observer.notify("Found:\n" + retVal.toString());
         } else {
-            observer.notify("Object with key \"" + key + "\" not found");
+            throw new CommandException("Object with key \"" + key + "\" not found");
         }
         session.close();
         return retVal;
@@ -61,7 +61,7 @@ public class SpringDao implements Store<String, WhoisObject> {
             WhoisObject whoisObject = modelAdapter.convertToWhoisObject(storeModel);
             observer.notify("Successfully deleted:\n" + whoisObject.toString());
         } else {
-            observer.notify("Object with key \"" + key + "\" not found");
+            throw new CommandException("Object with key \"" + key + "\" not found");
         }
         session.close();
     }

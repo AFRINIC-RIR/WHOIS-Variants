@@ -16,7 +16,8 @@ public class WhoisService extends AbstractService<String> {
 
     private String command;
 
-    public String messageReceived(@Header("command") String command, @Body String msg) {
+    public String messageReceived(@Header("command") String command,
+                                  @Body String msg) {
         this.command = command;
         return process(msg);
     }

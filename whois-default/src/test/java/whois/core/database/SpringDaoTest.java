@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import whois.core.AbstractDatabaseTestCase;
+import whois.core.api.CommandException;
 import whois.core.api.Observer;
 import whois.core.api.Store;
 import whois.core.model.rpsl.RpslWhoisObject;
@@ -14,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static junit.framework.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * Created by yogesh on 12/18/14.
@@ -53,10 +53,10 @@ public class SpringDaoTest extends AbstractDatabaseTestCase {
         assertDataEquals(expectedData, subject, " a: b  ");
     }
 
-    @Test
+    @Test(expected = CommandException.class)
     public void testDelete() {
         assertNotNull(subject.load("a:b", observer));
         subject.delete("a:b", observer);
-        assertNull(subject.load("a:b", observer));
+        subject.load("a:b", observer);
     }
 }
