@@ -40,18 +40,6 @@ public class RpslWhoisObject implements WhoisObject, Serializable {
 
     @Override
     public String toString() {
-        /*
-        StringBuilder sb = new StringBuilder();
-        StringBuilder sb2 = new StringBuilder();
-        Iterator<Map.Entry<String, String>> iterator = getKeyValueIterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            sb2.setLength(0);
-            sb2.append(entry.getKey()).append(":");
-            sb.append(String.format(RPSL_LINE_FORMAT, sb2.toString(), entry.getValue())).append("\n");
-        }
-        return sb.toString();
-        */
         return rpslFormatUtil.format(keyValueMap);
     }
 }

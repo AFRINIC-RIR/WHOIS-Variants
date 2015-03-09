@@ -88,12 +88,12 @@
            - HTTP - DONE
            - Quartz - DONE
            - Email - HARD
-         - Load balancing - DONE
-         - Exception handling - DONE
-         - Return selected HTTP Error code - DONE
-         - Parallel updates
          - Output
            - Multiple formats from 1 query endpoint - DONE
+         - Load balancing - DONE
+         - Exception handling - DONE
+         - Return appropriate HTTP Error code - DONE
+         - Parallel updates - TODO
          - BPM
            - activiti-camel - HARD
 

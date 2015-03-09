@@ -19,18 +19,29 @@
         </onException>
 
         <!-- Load balancer -->
-        <route id="restlet-query-convert">
+        <route id="restlet-query-master">
             <from uri="restlet:http://localhost:4480/{id}/{format}?restletMethod=get"/>
             <loadBalance>
                 <roundRobin/>
-                <to uri="direct:restlet-query-convert-4481"/>
-                <to uri="direct:restlet-query-convert-4482"/>
-                <to uri="direct:restlet-query-convert-4483"/>
+                <to uri="direct:query-slave-01"/>
+                <to uri="direct:query-slave-02"/>
+                <to uri="direct:query-slave-03"/>
             </loadBalance>
         </route>
 
-        <route id="restlet-query-convert-4481">
-            <from uri="direct:restlet-query-convert-4481"/>
+        <!-- Multicaster -->
+        <route id="restlet-update-master">
+            <from uri="restlet:http://localhost:4480/?restletMethods=post,put"/>
+            <multicast stopOnException="true" parallelProcessing="true">
+                <to uri="direct:update-whois"/>
+                <to uri="direct:update-solr"/>
+                <!--<to uri="direct:update-couchdb"/>-->
+                <to uri="direct:update-email"/>
+            </multicast>
+        </route>
+
+        <route id="query-slave-01">
+            <from uri="direct:query-slave-01"/>
             <transform>
                 <simple>${header.id}</simple>
             </transform>
@@ -46,8 +57,8 @@
             <to uri="velocity:whois-query.vm"/>
         </route>
 
-        <route id="restlet-query-convert-4482">
-            <from uri="direct:restlet-query-convert-4482"/>
+        <route id="query-slave-02">
+            <from uri="direct:query-slave-02"/>
             <transform>
                 <simple>${header.id}</simple>
             </transform>
@@ -63,8 +74,8 @@
             <to uri="velocity:whois-query.vm"/>
         </route>
 
-        <route id="restlet-query-convert-4483">
-            <from uri="direct:restlet-query-convert-4483"/>
+        <route id="query-convert-slave-03">
+            <from uri="direct:query-convert-slave-03"/>
             <transform>
                 <simple>${header.id}</simple>
             </transform>
@@ -78,6 +89,44 @@
             <bean ref="TextConvertService" method="messageReceived"/>
             <to uri="log:whois.core.api.QueryCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false"/>
             <to uri="velocity:whois-query.vm"/>
+        </route>
+
+        <route id="update-whois">
+            <from uri="direct:update-whois"/>
+            <setHeader headerName="command">
+                <constant>update</constant>
+            </setHeader>
+            <bean ref="WhoisService" method="messageReceived"/>
+            <to uri="log:whois.core.api.UpdateCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false"/>
+            <to uri="velocity:whois-query.vm"/>
+        </route>
+
+        <route id="update-solr">
+            <from uri="direct:update-solr"/>
+            <to uri="log:whois.core.api.UpdateCommand?level=INFO&amp;multiline=true&amp;skipBodyLineSeparator=false&amp;showStreams=true"/>
+            <bean ref="Rpsl2SolrService" method="messageReceived"/>
+            <setHeader headerName="SolrOperation">
+                <constant>INSERT</constant>
+            </setHeader>
+            <to uri="solrCloud://bamboo01.dev.mu.afrinic.net:8983/solr?collection=collection1&amp;allowCompression=true"/>
+            <setHeader headerName="SolrOperation">
+                <constant>COMMIT</constant>
+            </setHeader>
+            <to uri="solrCloud://bamboo01.dev.mu.afrinic.net:8983/solr?collection=collection1&amp;allowCompression=true"/>
+        </route>
+
+        <!--
+        <route id="update-couchdb">
+            <from uri="direct:update-couchdb"/>
+            <bean ref="Rpsl2CouchdbService" method="messageReceived"/>
+            <to uri="couchdb:http://localhost:5984/whois?createDatabase=true"/>
+        </route>
+        -->
+
+        <route id="update-email">
+            <from uri="direct:update-email"/>
+            <bean ref="TextConvertService" method="messageReceived"/>
+            <to uri="smtp://smtp.afrinic.net?From=service@afrinic.net&amp;To=yogesh@afrinic.net&amp;Subject=WHOIS+Update"/>
         </route>
 
     </camelContext>

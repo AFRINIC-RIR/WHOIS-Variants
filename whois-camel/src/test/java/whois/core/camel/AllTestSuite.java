@@ -12,6 +12,7 @@ import whois.core.camel.command.Rpsl2JsonCommandTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({Json2RpslCommandTest.class,
         Rpsl2CouchdbCommandTest.class,
-        Rpsl2JsonCommandTest.class})
+        Rpsl2JsonCommandTest.class,
+        CamelServerTest.class})
 public class AllTestSuite {
 }
